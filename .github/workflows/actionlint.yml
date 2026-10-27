@@ -1,6 +1,9 @@
 name: Actionlint
 
 on:
+  push:
+    branches:
+      - dev
   pull_request:
 
 permissions: read-all

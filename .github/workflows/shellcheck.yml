@@ -1,6 +1,9 @@
 name: ShellCheck
 
 on:
+  push:
+    branches:
+      - dev
   pull_request:
 
 permissions: read-all
