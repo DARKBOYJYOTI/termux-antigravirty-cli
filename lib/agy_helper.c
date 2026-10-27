@@ -18,9 +18,9 @@
 #define AGY_TERMUX_VERSION "1.0.2"
 #endif
 
-#define AGY_LATEST_RELEASE_URL "https://github.com/wallentx/antigravity-cli-termux/releases/latest"
+#define AGY_LATEST_RELEASE_URL "https://github.com/DARKBOYJYOTI/termux-antigravirty-cli/releases/latest"
 #define AGY_RELEASE_TAG_URL_PREFIX                                                                 \
-    "https://github.com/wallentx/antigravity-cli-termux/releases/tag/"
+    "https://github.com/DARKBOYJYOTI/termux-antigravirty-cli/releases/tag/"
 
 enum update_check_mode {
     UPDATE_CHECK_EXPLICIT,
@@ -416,7 +416,7 @@ static int perform_transactional_update(const char *dir, const char *latest_tag)
         "if [ \"$rollback_failed\" -ne 0 ]; then exit 125; fi; exit \"$status\"; }; "
         "trap cleanup EXIT; trap 'exit 129' HUP; trap 'exit 130' INT; trap 'exit 143' TERM; "
         "curl -fsSL -o \"$tmp/antigravity-termux-standalone.tar.gz\" "
-        "\"https://github.com/wallentx/antigravity-cli-termux/releases/download/"
+        "\"https://github.com/DARKBOYJYOTI/termux-antigravirty-cli/releases/download/"
         "$release_tag/antigravity-termux-standalone.tar.gz\" && "
         "tar -xzf \"$tmp/antigravity-termux-standalone.tar.gz\" -C \"$tmp\" "
         "agy agy.va39 && "
@@ -447,7 +447,7 @@ static void check_and_perform_update(enum update_check_mode mode, const char *di
                                      int auto_update) {
     char latest_tag[64] = {0};
     if (mode == UPDATE_CHECK_EXPLICIT) {
-        printf("[agy-termux] Querying latest release from wallentx/antigravity-cli-termux...\n");
+        printf("[agy-termux] Querying latest release from DARKBOYJYOTI/termux-antigravirty-cli...\n");
     }
     if (!fetch_latest_release_tag(mode, latest_tag, sizeof(latest_tag))) {
         return;
@@ -620,23 +620,14 @@ static int require_resolver_config(const char *prefix) {
     return 1;
 }
 
-static int resolve_qemu_for_cpu(const char *prefix, char *qemu_path, size_t qemu_path_len,
-                                const char **qemu) {
+static int require_lse_cpu(void) {
     unsigned long hwcap = getauxval(AT_HWCAP);
 
-    *qemu = NULL;
     if ((hwcap & HWCAP_ATOMICS) != 0) {
         return 1;
     }
 
-    int qemu_written = snprintf(qemu_path, qemu_path_len, "%s/bin/qemu-aarch64", prefix);
-    if (qemu_written > 0 && (size_t)qemu_written < qemu_path_len && access(qemu_path, F_OK) == 0) {
-        *qemu = qemu_path;
-        return 1;
-    }
-
-    (void)fprintf(stderr, "[agy-termux] CPU lacks LSE atomics, and qemu-aarch64 was not found.\n");
-    (void)fprintf(stderr, "[agy-termux] You may need to install the qemu-user-aarch64 package.\n");
+    (void)fprintf(stderr, "[agy-termux] CPU lacks LSE atomics. Emulation is disabled; this build requires an LSE-capable ARM64 CPU.\n");
     return 0;
 }
 
@@ -647,11 +638,9 @@ int main(int argc, char **argv) {
     char dynamic_loader[PATH_MAX];
     char cert_path[PATH_MAX];
     char prefix_path[PATH_MAX];
-    char qemu_path[PATH_MAX];
     const char *prefix = getenv("PREFIX");
     const char *loader = NULL;
     const char *dir = NULL;
-    const char *qemu = NULL;
     const char *exec_target = NULL;
     const char *exec_error = NULL;
     char **new_argv = NULL;
@@ -664,7 +653,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (!resolve_qemu_for_cpu(prefix, qemu_path, sizeof(qemu_path), &qemu)) {
+    if (!require_lse_cpu()) {
         return 1;
     }
     written = snprintf(prefix_path, sizeof(prefix_path), "%s", prefix);
@@ -734,7 +723,7 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    // We allocate enough space for: qemu + loader + "--library-path" + lib_path
+    // We allocate enough space for: loader + "--library-path" + lib_path
     // + patched_bin + user args + NULL
     int new_argc = argc + 6;
     new_argv = malloc((size_t)new_argc * sizeof(*new_argv));
@@ -743,11 +732,6 @@ int main(int argc, char **argv) {
     }
 
     arg_idx = 0;
-    if (qemu) {
-        new_argv[arg_idx++] = (char *)qemu;
-        exec_target = qemu;
-        exec_error = "[agy-termux] execv (qemu) failed";
-    }
     new_argv[arg_idx++] = (char *)loader;
     new_argv[arg_idx++] = "--library-path";
     new_argv[arg_idx++] = lib_path;

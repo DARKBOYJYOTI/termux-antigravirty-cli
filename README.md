@@ -5,7 +5,7 @@
 ## 🚀 Quick Start (Termux)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wallentx/antigravity-cli-termux/dev/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/DARKBOYJYOTI/termux-antigravirty-cli/dev/install.sh | bash
 ```
 
 ![Antigravity CLI Demo](antigravity.gif)
@@ -41,11 +41,9 @@ To circumvent this, a relocatable C bootstrapper (`agy`) is compiled:
 * **Environment Cleansing**: Unsets conflicting environment variables (`LD_PRELOAD`, `LD_LIBRARY_PATH`) before executing the loader.
 * **Redirection**: Configures the native Termux CA bundle (`SSL_CERT_FILE`) and DNS routing (`GODEBUG=netdns=cgo`), then passes execution cleanly to the glibc loader.
 
-#### 3. LSE (Large System Extensions) & QEMU Support
+#### 3. LSE (Large System Extensions), native CPU only
 The engine requires ARMv8.1-A Atomics (LSE) to run natively. On older ARMv8.0-A CPUs lacking LSE support, the binary will crash with an "Illegal Instruction".
-This fork includes an automated compatibility layer:
-* **Detection**: The installer and bootstrapper automatically detect if the CPU lacks LSE support via `getauxval(AT_HWCAP)`.
-* **QEMU Emulation**: If LSE is missing and `qemu-aarch64` is already installed, the bootstrapper wraps engine execution through it. If QEMU is missing, the installer reports that the `qemu-user-aarch64` package may be needed and exits without installing packages automatically.
+The installer and bootstrapper detect LSE support via `getauxval(AT_HWCAP)`. CPUs without LSE are rejected; QEMU and other emulation paths are not used. The upstream engine remains a glibc binary running on the device CPU through Termux glibc, so this is native CPU execution but not a Bionic-only engine port.
 
 #### 4. Native Termux Only
 This standalone port is intentionally scoped to native Termux on Android. PRoot environments can run Google's official Antigravity CLI binary directly, so this project no longer ships a PRoot compatibility layer.
@@ -101,7 +99,7 @@ Antigravity CLI brings the core capabilities of Antigravity 2.0 (multi-step reas
 
 ### Android (Termux)
 ```bash
-curl -fsSL https://raw.githubusercontent.com/wallentx/antigravity-cli-termux/dev/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/DARKBOYJYOTI/termux-antigravirty-cli/dev/install.sh | bash
 ```
 
 ### macOS / Linux

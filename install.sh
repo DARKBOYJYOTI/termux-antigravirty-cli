@@ -2,7 +2,7 @@
 # Antigravity - Termux Installer
 set -Eeuo pipefail
 
-REPO="${AGY_REPO:-wallentx/antigravity-cli-termux}"
+REPO="${AGY_REPO:-DARKBOYJYOTI/termux-antigravirty-cli}"
 URL="${AGY_INSTALL_URL:-https://github.com/$REPO/releases/latest/download/antigravity-termux-standalone.tar.gz}"
 
 # ── Environment Detection ─────────────────────────────────────────────────────
@@ -254,10 +254,6 @@ check_lse() {
   grep -q "atomics" /proc/cpuinfo
 }
 
-check_qemu() {
-  command -v qemu-aarch64 >/dev/null 2>&1
-}
-
 CA_BUNDLE="${TERMUX_PREFIX}/etc/tls/cert.pem"
 if [[ ! -s "$CA_BUNDLE" ]]; then
   die "Missing Termux CA bundle: $CA_BUNDLE
@@ -272,11 +268,7 @@ You may need to install the resolv-conf package, then rerun this installer:
 fi
 
 if ! check_lse; then
-  if ! check_qemu; then
-    die "This CPU does not support LSE atomics, and qemu-aarch64 was not found.
-You may need to install the qemu-user-aarch64 package, then rerun this installer."
-  fi
-  ok "LSE Emulation: QEMU enabled"
+  die "This CPU does not support LSE atomics. Emulation is disabled; this build requires an LSE-capable ARM64 CPU."
 fi
 
 ok "Environment: ${ENV_TYPE} (aarch64)"
@@ -332,7 +324,7 @@ divider
 info "Installed binaries to: ${BOLD}${INSTALL_BIN_DIR}${RESET}"
 info "Release archive kept at: ${BOLD}${TMP}${RESET}"
 info "Optional verification:"
-info "${BOLD}cd $(dirname "$TMP") && gh attestation verify antigravity-termux-standalone.tar.gz -R wallentx/antigravity-cli-termux${RESET}"
+info "${BOLD}cd $(dirname "$TMP") && gh attestation verify antigravity-termux-standalone.tar.gz -R ${REPO}${RESET}"
 printf '\n'
 
 case ":$PATH:" in
