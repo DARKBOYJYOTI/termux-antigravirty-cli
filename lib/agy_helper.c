@@ -18,7 +18,8 @@
 #define AGY_TERMUX_VERSION "1.0.2"
 #endif
 
-#define AGY_LATEST_RELEASE_URL "https://github.com/DARKBOYJYOTI/termux-antigravirty-cli/releases/latest"
+#define AGY_LATEST_RELEASE_URL \
+    "https://github.com/DARKBOYJYOTI/termux-antigravirty-cli/releases/latest"
 #define AGY_RELEASE_TAG_URL_PREFIX                                                                 \
     "https://github.com/DARKBOYJYOTI/termux-antigravirty-cli/releases/tag/"
 
@@ -447,7 +448,8 @@ static void check_and_perform_update(enum update_check_mode mode, const char *di
                                      int auto_update) {
     char latest_tag[64] = {0};
     if (mode == UPDATE_CHECK_EXPLICIT) {
-        printf("[agy-termux] Querying latest release from DARKBOYJYOTI/termux-antigravirty-cli...\n");
+        printf("[agy-termux] Querying latest release from "
+               "DARKBOYJYOTI/termux-antigravirty-cli...\n");
     }
     if (!fetch_latest_release_tag(mode, latest_tag, sizeof(latest_tag))) {
         return;
@@ -627,7 +629,9 @@ static int require_lse_cpu(void) {
         return 1;
     }
 
-    (void)fprintf(stderr, "[agy-termux] CPU lacks LSE atomics. Emulation is disabled; this build requires an LSE-capable ARM64 CPU.\n");
+    (void)fprintf(stderr,
+                  "[agy-termux] CPU lacks LSE atomics. Emulation is disabled; this build "
+                  "requires an LSE-capable ARM64 CPU.\n");
     return 0;
 }
 
